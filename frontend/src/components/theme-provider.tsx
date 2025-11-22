@@ -22,7 +22,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "light",
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
@@ -42,14 +42,14 @@ export function ThemeProvider({
         : "light"
 
       root.classList.add(systemTheme)
-      
+
       // Listen for system theme changes
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
       const handleChange = (e: MediaQueryListEvent) => {
         root.classList.remove("light", "dark")
         root.classList.add(e.matches ? "dark" : "light")
       }
-      
+
       mediaQuery.addEventListener("change", handleChange)
       return () => mediaQuery.removeEventListener("change", handleChange)
     }
