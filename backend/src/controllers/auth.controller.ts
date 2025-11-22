@@ -4,6 +4,19 @@ import jwt from 'jsonwebtoken';
 import prisma from '../utils/prisma';
 import { SignupUniversityDTO, SignupStudentDTO, LoginDTO } from '../types';
 
+export const getUniversities = async (req: Request, res: Response) => {
+  try {
+    const universities = await prisma.university.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    });
+
+    res.json({ universities });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const signupUniversity = async (req: Request, res: Response) => {
   try {
     const { name, email, password, walletAddress }: SignupUniversityDTO = req.body;

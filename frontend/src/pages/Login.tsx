@@ -37,7 +37,7 @@ export default function Login() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 container flex items-center justify-center py-16">
+      <main className="flex-1 container flex items-center justify-center pt-24 pb-16">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Login</CardTitle>

@@ -34,7 +34,7 @@ export default function StudentDashboard() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 container py-8">
+      <main className="flex-1 container pt-20 pb-8">
         <div className="space-y-6">
           <div>
             <h2 className="text-3xl font-bold">My Certificates</h2>

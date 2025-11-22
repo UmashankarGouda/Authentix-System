@@ -1,131 +1,51 @@
-import { Link } from 'react-router-dom';
-import { Shield, Lock, Cloud, RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import VerifySection from '@/components/VerifySection';
 
 export default function Home() {
-  const { isAuthenticated, user } = useAuth();
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="container py-20 space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="text-5xl font-bold tracking-tight">
-              Resilient Certificate System
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Secure, decentralized academic credentials backed by blockchain technology
-              with built-in recovery mechanisms
+      <main className="flex-1 pt-16">
+        {/* Primary: Verify Certificate */}
+        <section className="border-b bg-muted/40 py-16">
+          <div className="container">
+            <VerifySection />
+          </div>
+        </section>
+
+        {/* About the project */}
+        <section className="container py-16 space-y-8">
+          <div className="space-y-4 text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tight">About the Resilient Certificate System</h2>
+            <p className="text-lg text-muted-foreground">
+              This project provides a tamper-evident way to issue and verify academic credentials using
+              blockchain, end-to-end encryption, decentralized storage, and a recovery-friendly design.
             </p>
-            <div className="flex gap-4 justify-center pt-4">
-              {isAuthenticated ? (
-                <Link to={user?.role === 'university' ? '/university' : '/student'}>
-                  <Button size="lg">Go to Dashboard</Button>
-                </Link>
-              ) : (
-                <>
-                  <Link to="/signup">
-                    <Button size="lg">Get Started</Button>
-                  </Link>
-                  <Link to="/verify">
-                    <Button size="lg" variant="outline">Verify Certificate</Button>
-                  </Link>
-                </>
-              )}
-            </div>
           </div>
-        </section>
 
-        {/* Features Section */}
-        <section className="container py-16">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader>
-                <Shield className="h-10 w-10 mb-2" />
-                <CardTitle>Blockchain-Backed</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Immutable proof of issuance on Ethereum Sepolia testnet
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Lock className="h-10 w-10 mb-2" />
-                <CardTitle>Client-Side Encryption</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  AES-256-GCM encryption ensures your data never leaves your browser unencrypted
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Cloud className="h-10 w-10 mb-2" />
-                <CardTitle>Decentralized Storage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Certificates stored on IPFS via Filebase for permanent, censorship-resistant access
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <RefreshCw className="h-10 w-10 mb-2" />
-                <CardTitle>Recovery System</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Shamir Secret Sharing with 3 custodians ensures credential recovery even if issuer is offline
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="container py-16">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-3 mt-6">
             <div className="space-y-2">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground text-xl font-bold mb-4">
-                1
-              </div>
-              <h3 className="text-xl font-semibold">Issue</h3>
-              <p className="text-muted-foreground">
-                Universities encrypt and upload certificates. Metadata and hashes are stored on the blockchain.
+              <h3 className="text-xl font-semibold">On-chain registry</h3>
+              <p className="text-muted-foreground text-sm">
+                Each credential is hashed and recorded on the Ethereum Sepolia testnet via a
+                dedicated smart contract, so anyone can prove issuance independently of our servers.
               </p>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground text-xl font-bold mb-4">
-                2
-              </div>
-              <h3 className="text-xl font-semibold">Verify</h3>
-              <p className="text-muted-foreground">
-                Anyone can verify a certificate by uploading the PDF or entering metadata. No authentication required.
+              <h3 className="text-xl font-semibold">Encrypted, decentralized storage</h3>
+              <p className="text-muted-foreground text-sm">
+                Certificates are encrypted in the browser using AES-256-GCM and stored on IPFS via Filebase.
+                The raw document never leaves the client unencrypted.
               </p>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground text-xl font-bold mb-4">
-                3
-              </div>
-              <h3 className="text-xl font-semibold">Recover</h3>
-              <p className="text-muted-foreground">
-                Students can recover credentials through custodians, even if the university's servers are down.
+              <h3 className="text-xl font-semibold">Recovery via custodians</h3>
+              <p className="text-muted-foreground text-sm">
+                The encryption key is split with Shamirs Secret Sharing and encrypted for independent
+                custodians, so students can recover access even if the issuing university is offline.
               </p>
             </div>
           </div>

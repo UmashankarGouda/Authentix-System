@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { authAPI, UniversityOption } from '@/lib/api';
 
 interface UniversityForm {
   name: string;
@@ -32,6 +33,27 @@ export default function Signup() {
 
   const universityForm = useForm<UniversityForm>();
   const studentForm = useForm<StudentForm>();
+  const [universities, setUniversities] = useState<UniversityOption[]>([]);
+  const [universityQuery, setUniversityQuery] = useState('');
+  const [selectedUniversity, setSelectedUniversity] = useState<UniversityOption | null>(null);
+  const [showUniversityDropdown, setShowUniversityDropdown] = useState(false);
+
+  useEffect(() => {
+    const loadUniversities = async () => {
+      try {
+        const data = await authAPI.getUniversities();
+        setUniversities(data);
+      } catch (error) {
+        toast.error('Failed to load universities');
+      }
+    };
+
+    loadUniversities();
+  }, []);
+
+  const filteredUniversities = universities.filter((u) =>
+    u.name.toLowerCase().includes(universityQuery.toLowerCase())
+  );
 
   const onUniversitySubmit = async (data: UniversityForm) => {
     if (data.password !== data.confirmPassword) {
@@ -71,7 +93,7 @@ export default function Signup() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 container flex items-center justify-center py-16">
+      <main className="flex-1 container flex items-center justify-center pt-24 pb-16">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Create Account</CardTitle>
@@ -168,16 +190,53 @@ export default function Signup() {
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="stu-universityId">University ID (UUID)</Label>
+                  <div className="space-y-2 relative">
+                    <Label htmlFor="stu-university">University</Label>
                     <Input
-                      id="stu-universityId"
-                      type="text"
-                      placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000"
-                      {...studentForm.register('universityId', { required: 'University ID is required' })}
+                      id="stu-university"
+                      placeholder="Start typing your university name"
+                      value={selectedUniversity ? selectedUniversity.name : universityQuery}
+                      onChange={(e) => {
+                        setSelectedUniversity(null);
+                        setUniversityQuery(e.target.value);
+                        setShowUniversityDropdown(true);
+                        studentForm.setValue('universityId', '');
+                      }}
+                      onFocus={() => setShowUniversityDropdown(true)}
+                      autoComplete="off"
+                    />
+                    <input
+                      type="hidden"
+                      {...studentForm.register('universityId', { required: 'University is required' })}
                     />
                     {studentForm.formState.errors.universityId && (
                       <p className="text-sm text-destructive">{studentForm.formState.errors.universityId.message}</p>
+                    )}
+
+                    {showUniversityDropdown && (
+                      <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-md border bg-background shadow">
+                        {filteredUniversities.length > 0 ? (
+                          filteredUniversities.map((u) => (
+                            <button
+                              key={u.id}
+                              type="button"
+                              className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                              onClick={() => {
+                                setSelectedUniversity(u);
+                                setUniversityQuery('');
+                                studentForm.setValue('universityId', u.id, { shouldValidate: true });
+                                setShowUniversityDropdown(false);
+                              }}
+                            >
+                              {u.name}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-muted-foreground">
+                            No universities found
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 

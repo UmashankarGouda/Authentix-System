@@ -31,10 +31,32 @@ interface IssueForm {
   file: FileList;
 }
 
+type StepState = 'idle' | 'pending' | 'success' | 'error';
+
+interface IssuanceStep {
+  key: 'prepare' | 'ipfs' | 'blockchain' | 'db';
+  label: string;
+  state: StepState;
+}
+
 function IssueCertificate() {
   const [custodians, setCustodians] = useState<Custodian[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [steps, setSteps] = useState<IssuanceStep[]>([
+    { key: 'prepare', label: 'Encrypt & prepare certificate', state: 'idle' },
+    { key: 'ipfs', label: 'Upload encrypted file to IPFS', state: 'idle' },
+    { key: 'blockchain', label: 'Record credential on blockchain', state: 'idle' },
+    { key: 'db', label: 'Save credential in database', state: 'idle' },
+  ]);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<IssueForm>();
+
+  const setStepState = (key: IssuanceStep['key'], state: StepState) => {
+    setSteps(prev => prev.map(step => step.key === key ? { ...step, state } : step));
+  };
+
+  const resetSteps = () => {
+    setSteps(prev => prev.map(step => ({ ...step, state: 'idle' })));
+  };
 
   useEffect(() => {
     loadCustodians();
@@ -56,9 +78,13 @@ function IssueCertificate() {
     }
 
     setIsLoading(true);
+    resetSteps();
     try {
       const file = data.file[0];
-      
+
+      // Local preparation phase
+      setStepState('prepare', 'pending');
+
       // Step 1: Read file
       const fileBuffer = await readFileAsArrayBuffer(file);
       
@@ -110,13 +136,28 @@ function IssueCertificate() {
       formData.append('encryptedShares', JSON.stringify(encryptedShares));
       formData.append('metadata', JSON.stringify(metadata));
       
-      // Step 9: Upload to backend
+      // Network phase: backend handles IPFS, blockchain, and DB writes
+      setStepState('prepare', 'success');
+      setStepState('ipfs', 'pending');
+      setStepState('blockchain', 'pending');
+      setStepState('db', 'pending');
+
+      // Step 9: Upload to backend (IPFS + blockchain + DB)
       const result = await certificateAPI.issue(formData);
-      
+
+      // If we reach here, all backend steps have succeeded
+      setStepState('ipfs', 'success');
+      setStepState('blockchain', 'success');
+      setStepState('db', 'success');
+
       toast.success(`Certificate issued successfully! TX: ${result.blockchainTx?.slice(0, 10)}...`);
       reset();
     } catch (error: any) {
       console.error('Issuance error:', error);
+      // Mark remaining steps as errored to reflect failure
+      setStepState('ipfs', steps.find(s => s.key === 'ipfs')?.state === 'success' ? 'success' : 'error');
+      setStepState('blockchain', steps.find(s => s.key === 'blockchain')?.state === 'success' ? 'success' : 'error');
+      setStepState('db', 'error');
       toast.error(error.response?.data?.message || 'Failed to issue certificate');
     } finally {
       setIsLoading(false);
@@ -190,6 +231,41 @@ function IssueCertificate() {
               {isLoading ? 'Issuing...' : 'Issue Certificate'}
             </Button>
           </form>
+
+          {/* Issuance status steps */}
+          <div className="mt-6 space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Issuance status</p>
+            <ul className="space-y-1 text-xs">
+              {steps.map((step) => {
+                const color =
+                  step.state === 'success'
+                    ? 'bg-emerald-500'
+                    : step.state === 'pending'
+                    ? 'bg-amber-500'
+                    : step.state === 'error'
+                    ? 'bg-red-500'
+                    : 'bg-muted-foreground/40';
+                const label =
+                  step.state === 'success'
+                    ? 'Done'
+                    : step.state === 'pending'
+                    ? 'In progress'
+                    : step.state === 'error'
+                    ? 'Error'
+                    : 'Waiting';
+
+                return (
+                  <li key={step.key} className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
+                    <span>{step.label}</span>
+                    <span className="ml-auto text-[10px] uppercase text-muted-foreground tracking-wide">
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </CardContent>
       </Card>
 
@@ -281,7 +357,7 @@ export default function UniversityDashboard() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <div className="flex-1 container py-8">
+      <div className="flex-1 container pt-20 pb-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <aside className="lg:col-span-1 space-y-2">

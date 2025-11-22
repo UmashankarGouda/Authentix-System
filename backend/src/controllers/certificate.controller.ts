@@ -30,7 +30,7 @@ export const issueCertificate = async (req: AuthRequest, res: Response) => {
     });
     
     if (!student) {
-      return res.status(404).json({ error: 'Student not found with this email' });
+      return res.status(404).json({ message: 'Student not found with this email' });
     }
     
     const studentId = student.id;
@@ -38,7 +38,7 @@ export const issueCertificate = async (req: AuthRequest, res: Response) => {
     // Get file from request (multer will put it in req.file)
     const file = (req as any).file;
     if (!file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ message: 'No file uploaded' });
     }
     
     // Upload encrypted file to IPFS
@@ -48,7 +48,7 @@ export const issueCertificate = async (req: AuthRequest, res: Response) => {
     // Issue on blockchain
     const blockchainTx = await issueCredentialOnChain(fileHash, jsonHash, cid);
 
-    // Store in database
+    // Store in database (include related student/university for richer response)
     const credential = await prisma.credential.create({
       data: {
         credentialNo,
@@ -64,40 +64,65 @@ export const issueCertificate = async (req: AuthRequest, res: Response) => {
         blockchainTx,
         status: 'issued',
       },
-    });
-
-    // Store encrypted shares
-    for (const share of encryptedShares) {
-      await prisma.credentialCustodianMapping.create({
-        data: {
-          credentialId: credential.id,
-          custodianId: share.custodianId,
-          encryptedShare: share.encryptedShare,
+      include: {
+        student: {
+          select: {
+            name: true,
+            regNo: true,
+          },
         },
-      });
-    }
-
-    // Log audit
-    await prisma.auditLog.create({
-      data: {
-        credentialId: credential.id,
-        eventType: 'issued',
-        actorId: universityId,
-        actorType: 'university',
+        university: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
+
+    // Store encrypted shares (best-effort; log errors but don't fail issuance)
+    try {
+      for (const share of encryptedShares) {
+        await prisma.credentialCustodianMapping.create({
+          data: {
+            credentialId: credential.id,
+            custodianId: share.custodianId,
+            encryptedShare: share.encryptedShare,
+          },
+        });
+      }
+    } catch (err) {
+      console.error('Error storing encrypted custodian shares:', err);
+    }
+
+    // Log audit (also best-effort)
+    try {
+      await prisma.auditLog.create({
+        data: {
+          credentialId: credential.id,
+          eventType: 'issued',
+          actorId: universityId,
+          actorType: 'university',
+        },
+      });
+    } catch (err) {
+      console.error('Error creating audit log for issuance:', err);
+    }
 
     res.status(201).json({
       message: 'Certificate issued successfully',
-      credential: {
-        id: credential.id,
-        credentialNo: credential.credentialNo,
-        cid,
-        blockchainTx,
-      },
+      credential,
     });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('Error issuing certificate:', error);
+
+    // Handle Prisma unique constraint on credentialNo explicitly
+    if (error.code === 'P2002' && error.meta?.target?.includes('credentialNo')) {
+      return res.status(409).json({
+        message: 'A credential with this Credential Number already exists. Please use a unique Credential Number.',
+      });
+    }
+
+    res.status(500).json({ message: error.message || 'Failed to issue certificate' });
   }
 };
 
@@ -123,16 +148,18 @@ export const verifyCertificate = async (req: any, res: Response) => {
     });
     console.log('  Database result:', credential ? 'Found' : 'Not found');
 
+    if (!credential) {
+      return res.json({
+        valid: true,
+        message: 'Credential found on blockchain but not in off-chain records',
+        credential: null,
+      });
+    }
+
     res.json({
       valid: true,
-      onChain: result,
-      details: credential ? {
-        studentName: credential.student.name,
-        universityName: credential.university.name,
-        degreeName: credential.degreeName,
-        graduationYear: credential.graduationYear,
-        issuedAt: credential.createdAt,
-      } : null,
+      message: 'Certificate verified successfully',
+      credential,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

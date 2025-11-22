@@ -34,6 +34,11 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface UniversityOption {
+  id: string;
+  name: string;
+}
+
 export interface Custodian {
   id: string;
   name: string;
@@ -93,6 +98,11 @@ export const authAPI = {
     return res.data;
   },
 
+  getUniversities: async (): Promise<UniversityOption[]> => {
+    const res = await api.get('/api/auth/universities');
+    return res.data.universities;
+  },
+
   login: async (data: {
     email: string;
     password: string;
@@ -121,7 +131,7 @@ export const certificateAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return res.data;
+    return res.data.credential;
   },
 
   list: async (): Promise<Credential[]> => {
