@@ -1,0 +1,103 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model University {
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  passwordHash  String
+  walletAddress String?
+  createdAt     DateTime      @default(now())
+  
+  students      Student[]
+  credentials   Credential[]
+  
+  @@map("universities")
+}
+
+model Student {
+  id            String        @id @default(uuid())
+  name          String
+  regNo         String        @unique
+  email         String        @unique
+  passwordHash  String
+  universityId  String
+  walletAddress String?
+  createdAt     DateTime      @default(now())
+  
+  university    University    @relation(fields: [universityId], references: [id])
+  credentials   Credential[]
+  
+  @@map("students")
+}
+
+model Custodian {
+  id        String   @id @default(uuid())
+  name      String
+  publicKey String   @db.Text
+  endpoint  String?
+  createdAt DateTime @default(now())
+  
+  credentialMappings CredentialCustodianMapping[]
+  
+  @@map("custodians")
+}
+
+model Credential {
+  id             String   @id @default(uuid())
+  credentialNo   String   @unique
+  studentId      String
+  universityId   String
+  degreeName     String
+  graduationYear Int
+  ipfsCID        String
+  fileHash       String
+  jsonHash       String
+  iv             String
+  authTag        String
+  blockchainTx   String?
+  status         String   @default("pending") // pending, issued, revoked
+  createdAt      DateTime @default(now())
+  
+  student        Student  @relation(fields: [studentId], references: [id])
+  university     University @relation(fields: [universityId], references: [id])
+  custodianMappings CredentialCustodianMapping[]
+  auditLogs      AuditLog[]
+  
+  @@map("credentials")
+}
+
+model CredentialCustodianMapping {
+  id              String   @id @default(uuid())
+  credentialId    String
+  custodianId     String
+  encryptedShare  String   @db.Text
+  createdAt       DateTime @default(now())
+  
+  credential      Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  custodian       Custodian  @relation(fields: [custodianId], references: [id])
+  
+  @@unique([credentialId, custodianId])
+  @@map("credential_custodian_mapping")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  credentialId String?
+  eventType    String   // issued, verified, recovered, revoked
+  payload      String?  @db.Text
+  actorId      String?  // user who performed action
+  actorType    String?  // university, student, verifier
+  timestamp    DateTime @default(now())
+  
+  credential   Credential? @relation(fields: [credentialId], references: [id])
+  
+  @@map("audit_logs")
+}
