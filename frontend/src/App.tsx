@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './components/theme-provider';
 import { Toaster } from 'sonner';
+import ScrollToTop from './components/ScrollToTop';
 
 // Pages
 import Login from './pages/Login';
@@ -37,18 +38,18 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 
 function AppRoutes() {
   const { isAuthenticated, user } = useAuth();
   const { theme } = useTheme();
-  const resolvedTheme = theme === 'system' 
+  const resolvedTheme = theme === 'system'
     ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : theme;
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={!isAuthenticated ? <Home /> : <Navigate to={user?.role === 'university' ? '/university' : '/student'} replace />} />
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={user?.role === 'university' ? '/university' : '/student'} />} />
         <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to={user?.role === 'university' ? '/university' : '/student'} />} />
         <Route path="/verify" element={<Verifier />} />
-        
+
         <Route
           path="/university/*"
           element={
@@ -57,7 +58,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/student/*"
           element={
@@ -66,7 +67,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster theme={resolvedTheme} richColors />
@@ -79,6 +80,7 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="cert-system-theme">
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <AppRoutes />
         </BrowserRouter>
       </AuthProvider>

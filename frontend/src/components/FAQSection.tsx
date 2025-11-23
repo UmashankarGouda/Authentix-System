@@ -44,7 +44,7 @@ export default function FAQSection() {
                 </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2">
                 {faqs.map((faq) => (
                     <motion.div
                         key={faq.id}

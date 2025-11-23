@@ -115,7 +115,7 @@ export default function ModernVerifySection() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -123,7 +123,7 @@ export default function ModernVerifySection() {
       >
         <div className="p-8 md:p-12">
           <div className="flex flex-col md:flex-row gap-12">
-            
+
             {/* Left Side: Input Area */}
             <div className="flex-1 space-y-8">
               <div className="space-y-2">
@@ -141,8 +141,8 @@ export default function ModernVerifySection() {
                   onClick={() => setActiveTab('file')}
                   className={cn(
                     "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                    activeTab === 'file' 
-                      ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm" 
+                    activeTab === 'file'
+                      ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
                       : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                   )}
                 >
@@ -152,8 +152,8 @@ export default function ModernVerifySection() {
                   onClick={() => setActiveTab('metadata')}
                   className={cn(
                     "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                    activeTab === 'metadata' 
-                      ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm" 
+                    activeTab === 'metadata'
+                      ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
                       : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                   )}
                 >
@@ -171,11 +171,11 @@ export default function ModernVerifySection() {
                     transition={{ duration: 0.3 }}
                   >
                     <form onSubmit={fileForm.handleSubmit(onFileVerify)} className="space-y-4">
-                      <div 
+                      <div
                         className={cn(
                           "relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 cursor-pointer group",
-                          dragActive 
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" 
+                          dragActive
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                             : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                         )}
                         onDragEnter={handleDrag}
@@ -184,9 +184,9 @@ export default function ModernVerifySection() {
                         onDrop={handleDrop}
                         onClick={() => document.getElementById('file-upload')?.click()}
                       >
-                        <input 
+                        <input
                           id="file-upload"
-                          type="file" 
+                          type="file"
                           accept=".pdf"
                           className="hidden"
                           {...fileForm.register('file')}
@@ -273,7 +273,7 @@ export default function ModernVerifySection() {
 
             {/* Right Side: Result Area */}
             <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-zinc-200 dark:border-zinc-800 pt-8 md:pt-0 md:pl-12 flex flex-col justify-center">
-               <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait">
                 {isLoading ? (
                   <motion.div
                     key="loading"
@@ -313,26 +313,25 @@ export default function ModernVerifySection() {
                         {result.message}
                       </p>
                     </div>
-                    
+
                     {result.valid && result.credential && (
-                      <div className="text-left text-xs space-y-2 pt-4 border-t border-green-200 dark:border-green-800/50">
-                        <div className="flex justify-between">
+                      <div className="text-left text-sm pt-6 border-t border-green-200 dark:border-green-800/50">
+                        <div className="grid grid-cols-[80px_1fr] gap-y-3 gap-x-4">
                           <span className="text-zinc-500">Degree:</span>
-                          <span className="font-medium">{result.credential.degreeName}</span>
-                        </div>
-                        <div className="flex justify-between">
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">{result.credential.degreeName}</span>
+
                           <span className="text-zinc-500">Student:</span>
-                          <span className="font-medium">{result.credential.student?.name}</span>
-                        </div>
-                        <div className="flex justify-between">
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">{result.credential.student?.name}</span>
+
                           <span className="text-zinc-500">Issuer:</span>
-                          <span className="font-medium">{result.credential.university?.name}</span>
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">{result.credential.university?.name}</span>
                         </div>
+
                         <a
                           href={`https://sepolia.etherscan.io/tx/${result.credential.blockchainTx}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block text-center text-blue-600 hover:underline mt-2"
+                          className="block text-center text-blue-600 hover:underline mt-6 text-xs"
                         >
                           View on Blockchain
                         </a>
