@@ -42,7 +42,7 @@ export default function Home() {
           </section>
 
           {/* FAQ Section */}
-          <section className="container px-4 md:px-6 mt-24 pt-16 scroll-mt-24" id="faq-section">
+          <section className="container px-4 md:px-6 mt-8 pt-8 scroll-mt-24" id="faq-section">
             <FAQSection />
           </section>
         </main>
