@@ -3,7 +3,7 @@ A decentralized platform for secure credential issuance, verification, and recov
 This system ensures tamper-proof credential records, simple verification, and a robust account/credential recovery workflow.
 
 📂 Repository Structure
-credential-verification-and-recovery-system/
+Authentix-System/
 │
 ├── frontend/   # React-based dApp for users, issuers & verifiers
 ├── backend/    # API service for off-chain logic and indexing
@@ -77,8 +77,8 @@ Docker
 
 🔧 Setup Instructions (Local Development)
 1️⃣ Clone the repository
-git clone https://github.com/dpokk/credential-verification-and-recovery-system.git
-cd credential-verification-and-recovery-system
+git clone https://github.com/UmashankarGouda/Authentix-System.git
+cd Authentix-System
 
 2️⃣ Smart Contracts (Hardhat)
 cd contracts
