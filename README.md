@@ -1,195 +1,193 @@
-Credential Verification & Recovery System
-A decentralized platform for secure credential issuance, verification, and recovery, built using smart contracts, a backend service, and a frontend dApp interface.
-This system ensures tamper-proof credential records, simple verification, and a robust account/credential recovery workflow.
+# Resilient Credential Verification System
 
-📂 Repository Structure
-Authentix-System/
-│
-├── frontend/   # React-based dApp for users, issuers & verifiers
-├── backend/    # API service for off-chain logic and indexing
-└── contracts/  # Solidity smart contracts (Hardhat)
+A decentralized, tamper-proof academic credential issuance and verification platform, leveraging blockchain technology, distributed storage, and cryptographic key management to eliminate fraud, ensure data permanence, and empower students with sovereign control over their qualifications.
 
-🚀 Features
-On-chain credential issuance
-Credential verification using immutable blockchain records
-Revocation support for invalid or expired credentials
-Recovery mechanism for users who lose access
-Issuer, holder & verifier roles
-Secure off-chain data indexing and API services
-Web3 wallet integration (MetaMask)
-Modular architecture for extensibility
+---
 
-🛠️ Tech Stack
+## The Problem with Traditional Systems
 
-Smart Contracts
-- Solidity
-- Hardhat
-- Ethers.js / Web3.js
+Conventional academic credential management suffers from several critical vulnerabilities:
 
-Backend
-- Node.js
-- Express / REST API
-- Database support (PostgreSQL/MongoDB depending on your setup)
-- Event listeners for on-chain indexing
+| Issue | Description |
+| :--- | :--- |
+| **Centralized Trust** | Reliance on a single institution as the sole source of truth creates a bottleneck for verification and a single point of failure. |
+| **Fraud Susceptibility** | Paper-based and even basic digital certificates can be forged or tampered with, undermining trust in legitimate qualifications. |
+| **Data Impermanence** | Institutional databases can be corrupted, lost to disasters, or simply decommissioned, erasing years of academic records. |
+| **Slow Verification** | The process often involves manual requests, emails, and significant wait times, hindering timely employment and enrollment decisions. |
+| **Lack of Portability** | Credentials are tightly bound to the issuing institution's systems, offering students no independent control. |
 
-Frontend
-- React + Vite/Next.js (based on repo config)
-- Web3 wallet integration
-- Axios/API connectors
-- Contract interaction via Ethers.js
+---
 
-📌 System Architecture
-Issuer/Hodler/Verifier
-        │
-        ▼
-Frontend (React dApp)
-        │  calls
-        ▼
-Backend (API server) ─── listens ───► Blockchain Events
-        │                               (Hardhat/Testnet/Mainnet)
-        ▼
-Database (optional for metadata storage)
+## Our Solution
 
+This platform addresses these challenges through a robust, multi-layered architecture:
 
-On-chain: credential hash, issuer info, revocation status
+1.  **Blockchain Anchoring**: A cryptographic hash of each credential is permanently recorded on an immutable, distributed ledger (Ethereum-compatible). This provides a public, verifiable, and tamper-evident proof of issuance that exists independently of any single entity.
 
-Off-chain: metadata, search index, recovery workflows
+2.  **Decentralized Storage (IPFS)**: The full credential document is stored on the InterPlanetary File System, ensuring content-addressable, censorship-resistant availability. The on-chain record links directly to this distributed data.
 
-⚙️ Prerequisites
+3.  **Cryptographic Key Recovery**: To prevent catastrophic loss of access, the system implements Shamir's Secret Sharing, distributing encryption key fragments across multiple independent custodians. This allows for key recovery without any single party ever holding the complete key.
 
-Install the following:
+---
 
-Node.js ≥ 16
+## Key Features
 
-npm or yarn
+-   **Instant Verification**: Any third party can verify a credential's authenticity against the blockchain in seconds.
+-   **Tamper-Proof Records**: On-chain hashes make any modification to the original document immediately detectable.
+-   **Disaster Resilience**: Distributed storage and key management ensure no single point of failure can destroy records.
+-   **Student-Centric Ownership**: Students receive their credential data and can present it for verification without institutional intermediary.
+-   **Full Audit Trail**: All issuance and verification events are logged, providing a transparent history.
 
-Git
+---
 
-Hardhat
+## Technology Stack
 
-MetaMask (for testing)
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React, TypeScript, Vite, Tailwind CSS |
+| **Backend** | Node.js, Express.js, TypeScript |
+| **Database** | PostgreSQL, Prisma ORM |
+| **Blockchain** | Solidity, Hardhat (Sepolia Testnet), Ethers.js |
+| **Distributed Storage** | IPFS (via **Filebase** S3-compatible API) |
+| **Cryptography** | AES-256-GCM (Content), RSA-OAEP (Keys), Shamir's Secret Sharing (Recovery) |
 
-(Optional)
+---
 
-PostgreSQL / MongoDB
+## Architecture Overview
 
-Docker
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Frontend (React/Vite)                         │
+│         [ University Portal ]   [ Student Portal ]   [ Verifier ]       │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │ HTTPS (REST API)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       Backend (Node.js / Express)                       │
+│   [ Auth ]   [ Issuance Logic ]   [ Key Management ]   [ Audit Logs ]   │
+└───────┬────────────────────┬────────────────────────────────┬───────────┘
+        │                    │                                │
+        ▼                    ▼                                ▼
+┌───────────────┐   ┌───────────────────┐            ┌────────────────────┐
+│  PostgreSQL   │   │   IPFS Gateway    │            │ Blockchain (EVM)   │
+│   (Prisma)    │   │ (Document Store)  │            │ (Smart Contract)   │
+└───────────────┘   └───────────────────┘            └────────────────────┘
+```
 
-🔧 Setup Instructions (Local Development)
-1️⃣ Clone the repository
-git clone https://github.com/UmashankarGouda/Authentix-System.git
-cd Authentix-System
+---
 
-2️⃣ Smart Contracts (Hardhat)
-cd contracts
-npm install
+## Getting Started
 
-Compile contracts
-npx hardhat compile
+### Prerequisites
 
-Start local blockchain
-npx hardhat node
+-   **Node.js** (v18 or later)
+-   **npm** or **yarn**
+-   **PostgreSQL** instance (local or cloud-hosted)
+-   Access to the **Sepolia testnet** (via Alchemy, Infura, or another RPC provider).
+-   A wallet with Sepolia ETH for gas fees (obtainable from public faucets).
 
-Deploy contracts
-npx hardhat run scripts/deploy.js --network localhost
+### Installation
 
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd miniproject
+    ```
 
-Save the deployed contract address for the frontend & backend .env.
+2.  **Install all dependencies:**
+    ```bash
+    npm run install:all
+    ```
 
-3️⃣ Backend Setup
-cd backend
-npm install
+3.  **Configure Environment Variables:**
+    Create `.env` files in the `backend` and `frontend` directories.
 
+    **Backend (`backend/.env`):**
+    ```env
+    # Database
+    DATABASE_URL="postgresql://user:password@localhost:5432/miniproject"
 
-Create your .env file:
+    # Server
+    PORT=5000
+    NODE_ENV=development
+    JWT_SECRET="your-secret-key"
+    JWT_EXPIRES_IN="7d"
 
-PORT=4000
-RPC_URL=http://127.0.0.1:8545
-PRIVATE_KEY=<your_private_key>
-CONTRACT_ADDRESS=<deployed_contract_address>
-DATABASE_URL=<optional>
-JWT_SECRET=super_secret_key
+    # Filebase (IPFS)
+    FILEBASE_ACCESS_KEY="your-access-key"
+    FILEBASE_SECRET_KEY="your-secret-key"
+    FILEBASE_BUCKET="your-bucket-name"
+    FILEBASE_REGION="us-east-1"
+    FILEBASE_ENDPOINT="https://s3.filebase.com"
 
-Start Backend
-npm run start   # or npm run dev
+    # Blockchain (Sepolia)
+    SEPOLIA_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/..."
+    PRIVATE_KEY="your-wallet-private-key"
+    CONTRACT_ADDRESS="0x..." # Deployed contract address
+    
+    # CORS
+    CORS_ORIGIN="http://localhost:5173"
+    ```
 
-4️⃣ Frontend Setup
-cd frontend
-npm install
+    **Frontend (`frontend/.env`):**
+    ```env
+    VITE_API_URL="http://localhost:5000"
+    VITE_CONTRACT_ADDRESS="0x..." # Same as backend CONTRACT_ADDRESS
+    VITE_SEPOLIA_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/..."
+    ```
 
+4.  **Set up the Database:**
+    ```bash
+    cd backend
+    npm run prisma:migrate
+    npm run prisma:generate
+    ```
 
-Create frontend .env:
+5.  **Deploy Smart Contracts (to Sepolia):**
+    ```bash
+    cd ../contracts
+    npx hardhat run scripts/deploy.ts --network sepolia
+    ```
+    Copy the deployed contract address and add it to `backend/.env` as `CONTRACT_ADDRESS`.
 
-VITE_CONTRACT_ADDRESS=<contract_address>
-VITE_RPC_URL=http://127.0.0.1:8545
+---
 
-Start Frontend
+## Running the Application
+
+From the project root, a single command starts both the frontend and backend development servers concurrently:
+
+```bash
 npm run dev
+```
 
+-   **Frontend**: `http://localhost:5173` (default Vite port)
+-   **Backend**: `http://localhost:5000` (as configured)
 
-Open the app at:
+---
 
-http://localhost:3000
+## Project Structure
 
+```
+miniproject/
+├── backend/             # Express.js API server
+│   ├── prisma/          # Database schema and migrations
+│   └── src/             # Controllers, Routes, Services, Middleware
+├── contracts/           # Solidity smart contracts and Hardhat config
+│   └── contracts/       # Source files for on-chain logic
+├── frontend/            # React single-page application
+│   └── src/             # Components, Pages, Hooks, Utils
+├── package.json         # Monorepo scripts
+└── README.md
+```
 
-Connect MetaMask → choose local network → interact with the dApp.
+---
 
-🧪 Testing
-Contracts
-cd contracts
-npx hardhat test
+## License
 
-Backend
-npm test
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-Frontend
-npm test
+---
 
-📘 Example Credential Flow
+## Contributing
 
-Issuer logs into the dApp
-
-Fills credential information
-
-Clicks Issue Credential → signs transaction
-
-Credential hash stored on-chain
-
-Holder receives credential ID / token
-
-Verifier checks credential by entering ID
-
-Smart contract returns:
-
-Issuer
-
-Valid / Revoked
-
-Timestamp
-
-Holder can trigger recovery options if needed
-
-🔄 Recovery Mechanism
-The system supports:
-- Social/multi-sig recovery
-- Recovery contacts
-- Off-chain verification + on-chain update
-- Optional identity verification steps via backend
-
-🤝 Contribution Guide
-- Fork the repository
-- Create a feature branch
-- Commit changes with clear messages
-- Submit a pull request
-
-Guidelines:
-- Follow TypeScript conventions
-- Add tests for new features
-- Update documentation when necessary
-
-
-👤 Authors
-GitHub: @dpokk
-Github: @UmashankarGouda
-
-For any additional docs, API references, or setup assistance — feel free to ask!
+Contributions are welcome. Please open an issue to discuss proposed changes before submitting a pull request. Ensure all code adheres to the existing style and includes appropriate tests.
